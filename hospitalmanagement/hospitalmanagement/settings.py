@@ -126,3 +126,6 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/images/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+# Change default login to below:
+LOGIN_REDIRECT_URL='/afterlogin'
