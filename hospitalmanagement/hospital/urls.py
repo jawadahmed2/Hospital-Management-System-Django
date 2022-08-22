@@ -17,6 +17,8 @@ urlpatterns = [
     path('patientclick', views.patientclick_view, name='patientclick'),
 
     # add admin, patient, doctor registration url
-    
+    path('adminsignup', views.admin_signup_view,name='adminsignup'),
+    path('doctorsignup', views.doctor_signup_view, name='doctorsignup'),
+    path('patientsignup', views.patient_signup_view,name='patientsignup'),
 
 ]
