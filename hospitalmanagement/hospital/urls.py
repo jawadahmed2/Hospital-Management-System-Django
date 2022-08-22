@@ -16,5 +16,7 @@ urlpatterns = [
     path('doctorclick', views.doctorclick_view, name='doctorclick'),
     path('patientclick', views.patientclick_view, name='patientclick'),
 
+    # add admin, patient, doctor registration url
+    
 
 ]
