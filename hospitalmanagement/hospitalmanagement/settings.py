@@ -129,3 +129,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 
 # Change default login to below:
 LOGIN_REDIRECT_URL='/afterlogin'
+
+# For default auto assigning primary key
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
