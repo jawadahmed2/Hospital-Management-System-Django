@@ -38,7 +38,7 @@ def adminclick_view(request):
         if is_admin(request.user):
             return redirect('admin-dashboard')
     context = {'error': 'Account Not Found, Please Register'}
-    return render(request, 'hospital/adminclick.html', context = context)
+    return render(request, 'hospital/adminclick.html', context=context)
 
 
 # for showing signup/login button for doctor(by submit)
@@ -57,12 +57,12 @@ def doctorclick_view(request):
 # for showing signup/login button for patient(by submit)
 def patientclick_view(request):
     if is_patient(request.user):
-            accountapproval = models.Patient.objects.all().filter(
-                user_id=request.user.id, status=True)
-            if accountapproval:
-                return redirect('patient-dashboard')
-            else:
-                return render(request, 'hospital/patient_wait_for_approval.html')
+        accountapproval = models.Patient.objects.all().filter(
+            user_id=request.user.id, status=True)
+        if accountapproval:
+            return redirect('patient-dashboard')
+        else:
+            return render(request, 'hospital/patient_wait_for_approval.html')
     return render(request, 'hospital/patientclick.html')
 
 # Now work for signup views
@@ -127,7 +127,7 @@ def patient_signup_view(request):  # sourcery skip: extract-method
 def afterlogin_view(request):  # sourcery skip: use-named-expression
     if is_admin(request.user):
         return redirect('admin-dashboard')
-    
+
     elif is_doctor(request.user):
         accountapproval = models.Doctor.objects.all().filter(
             user_id=request.user.id, status=True)
