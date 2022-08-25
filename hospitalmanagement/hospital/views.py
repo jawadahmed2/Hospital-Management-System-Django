@@ -127,6 +127,7 @@ def patient_signup_view(request):  # sourcery skip: extract-method
 def afterlogin_view(request):  # sourcery skip: use-named-expression
     if is_admin(request.user):
         return redirect('admin-dashboard')
+    
     elif is_doctor(request.user):
         accountapproval = models.Doctor.objects.all().filter(
             user_id=request.user.id, status=True)
