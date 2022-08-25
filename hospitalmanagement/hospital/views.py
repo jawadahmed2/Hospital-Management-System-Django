@@ -146,3 +146,63 @@ def admin_dashboard_view(request):
     'pendingappointmentcount':pendingappointmentcount,
     }
     return render(request,'hospital/admin_dashboard.html',context=mydict)
+
+
+
+#--------------------------------------------------------------#
+
+
+
+#---------------------------------------------------------------------------------
+#------------------------ DOCTOR RELATED VIEWS START ------------------------------
+#---------------------------------------------------------------------------------
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor)
+def doctor_dashboard_view(request):
+    #for three cards
+    patientcount=models.Patient.objects.all().filter(status=True,assignedDoctorId=request.user.id).count()
+    appointmentcount=models.Appointment.objects.all().filter(status=True,doctorId=request.user.id).count()
+    patientdischarged=models.PatientDischargeDetails.objects.all().distinct().filter(assignedDoctorName=request.user.first_name).count()
+
+    #for  table in doctor dashboard
+    appointments=models.Appointment.objects.all().filter(status=True,doctorId=request.user.id).order_by('-id')
+    patientid=[]
+    for a in appointments:
+        patientid.append(a.patientId)
+    patients=models.Patient.objects.all().filter(status=True,user_id__in=patientid).order_by('-id')
+    appointments=zip(appointments,patients)
+    mydict={
+    'patientcount':patientcount,
+    'appointmentcount':appointmentcount,
+    'patientdischarged':patientdischarged,
+    'appointments':appointments,
+    'doctor':models.Doctor.objects.get(user_id=request.user.id), #for profile picture of doctor in sidebar
+    }
+    return render(request,'hospital/doctor_dashboard.html',context=mydict)
+
+
+
+
+
+#-----------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------------------
+#------------------------ PATIENT RELATED VIEWS START ------------------------------
+#---------------------------------------------------------------------------------
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient)
+def patient_dashboard_view(request):
+    patient=models.Patient.objects.get(user_id=request.user.id)
+    doctor=models.Doctor.objects.get(user_id=patient.assignedDoctorId)
+    mydict={
+    'patient':patient,
+    'doctorName':doctor.get_name,
+    'doctorMobile':doctor.mobile,
+    'doctorAddress':doctor.address,
+    'symptoms':patient.symptoms,
+    'doctorDepartment':doctor.department,
+    'admitDate':patient.admitDate,
+    }
+    return render(request,'hospital/patient_dashboard.html',context=mydict)
+

@@ -34,8 +34,40 @@ urlpatterns = [
     path('logout', LogoutView.as_view(
         template_name='hospital/index.html'), name='logout'),
 
-    #admin dashboard
+    # admin dashboard
     path('admin-dashboard', views.admin_dashboard_view, name='admin-dashboard'),
+
+    # # Doctor related admin work
+    # path('admin-doctor', views.admin_doctor_view, name='admin-doctor'),
+    # path('admin-view-doctor', views.admin_view_doctor_view,
+    #      name='admin-view-doctor'),
+    # path('delete-doctor-from-hospital/<int:pk>',
+    #      views.delete_doctor_from_hospital_view, name='delete-doctor-from-hospital'),
+    # path('update-doctor/<int:pk>', views.update_doctor_view, name='update-doctor'),
+    # path('admin-add-doctor', views.admin_add_doctor_view, name='admin-add-doctor'),
+    # path('admin-approve-doctor', views.admin_approve_doctor_view,
+    #      name='admin-approve-doctor'),
+    # path('approve-doctor/<int:pk>',
+    #      views.approve_doctor_view, name='approve-doctor'),
+    # path('reject-doctor/<int:pk>', views.reject_doctor_view, name='reject-doctor'),
+    # path('admin-view-doctor-specialisation', views.admin_view_doctor_specialisation_view,
+    #      name='admin-view-doctor-specialisation'),
+
+
+]
+
+# ---------FOR DOCTOR RELATED URLS-------------------------------------
+urlpatterns += [
+    path('doctor-dashboard', views.doctor_dashboard_view, name='doctor-dashboard'),
+
+]
+
+
+# ---------FOR PATIENT RELATED URLS-------------------------------------
+urlpatterns += [
+
+    path('patient-dashboard', views.patient_dashboard_view,
+         name='patient-dashboard'),
 
 
 ]
