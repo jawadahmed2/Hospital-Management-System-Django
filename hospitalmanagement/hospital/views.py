@@ -421,6 +421,17 @@ def discharge_patient_view(request, pk):
         'day': d,
         'assignedDoctorName': assignedDoctor[0].first_name,
     }
+    patientDict = {
+        'patientId': pk,
+        'name': patient.get_name,
+        'mobile': patient.mobile,
+        'address': patient.address,
+        'symptoms': patient.symptoms,
+        'admitDate': patient.admitDate,
+        'todayDate': date.today(),
+        'day': d,
+        'assignedDoctorName': assignedDoctor[0].first_name,
+    }
     if request.method == 'POST':
         feeDict = {
             'roomCharge': int(request.POST['roomCharge'])*int(d),
