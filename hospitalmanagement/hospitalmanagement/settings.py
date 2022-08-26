@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -128,7 +129,7 @@ MEDIA_URL = '/images/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 
 # Change default login to below:
-LOGIN_REDIRECT_URL='/afterlogin'
+LOGIN_REDIRECT_URL = '/afterlogin'
 
 LOGIN_URL = '/'
 
