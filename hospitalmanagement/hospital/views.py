@@ -485,8 +485,69 @@ def download_pdf_view(request, pk):
     }
     return render_to_pdf('hospital/download_bill.html', dict)
 
+# -----------------APPOINTMENT START-------------------------------------------------------------------
 
-#--------------------------------------------------------------#
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_appointment_view(request):
+    return render(request, 'hospital/admin_appointment.html')
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_view_appointment_view(request):
+    appointments = models.Appointment.objects.all().filter(status=True)
+    return render(request, 'hospital/admin_view_appointment.html', {'appointments': appointments})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_add_appointment_view(request):
+    appointmentForm = forms.AppointmentForm()
+    mydict = {'appointmentForm': appointmentForm, }
+    if request.method == 'POST':
+        appointmentForm = forms.AppointmentForm(request.POST)
+        if appointmentForm.is_valid():
+            appointment = appointmentForm.save(commit=False)
+            appointment.doctorId = request.POST.get('doctorId')
+            appointment.patientId = request.POST.get('patientId')
+            appointment.doctorName = models.User.objects.get(
+                id=request.POST.get('doctorId')).first_name
+            appointment.patientName = models.User.objects.get(
+                id=request.POST.get('patientId')).first_name
+            appointment.status = True
+            appointment.save()
+        return HttpResponseRedirect('admin-view-appointment')
+    return render(request, 'hospital/admin_add_appointment.html', context=mydict)
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_approve_appointment_view(request):
+    # those whose approval are needed
+    appointments = models.Appointment.objects.all().filter(status=False)
+    return render(request, 'hospital/admin_approve_appointment.html', {'appointments': appointments})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def approve_appointment_view(request, pk):
+    appointment = models.Appointment.objects.get(id=pk)
+    appointment.status = True
+    appointment.save()
+    return redirect(reverse('admin-approve-appointment'))
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def reject_appointment_view(request, pk):
+    appointment = models.Appointment.objects.get(id=pk)
+    appointment.delete()
+    return redirect('admin-approve-appointment')
+# ---------------------------------------------------------------------------------
+# ------------------------ ADMIN RELATED VIEWS END ------------------------------
+# ---------------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------------
