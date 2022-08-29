@@ -39,9 +39,8 @@ def is_patient(user):
 
 # for showing signup/login button for admin(by submit)
 def adminclick_view(request):
-    if request.user.is_authenticated:
-        if is_admin(request.user):
-            return redirect('admin-dashboard')
+    if request.user.is_authenticated and is_admin(request.user):
+        return redirect('admin-dashboard')
     context = {'error': 'Account Not Found, Please Register'}
     return render(request, 'hospital/adminclick.html', context=context)
 
@@ -49,9 +48,7 @@ def adminclick_view(request):
 # for showing signup/login button for doctor(by submit)
 def doctorclick_view(request):
     if is_doctor(request.user):
-        accountapproval = models.Doctor.objects.all().filter(
-            user_id=request.user.id, status=True)
-        if accountapproval:
+        if accountapproval := models.Doctor.objects.all().filter(user_id=request.user.id, status=True):
             return redirect('doctor-dashboard')
         else:
             return render(request, 'hospital/doctor_wait_for_approval.html')
@@ -62,9 +59,7 @@ def doctorclick_view(request):
 # for showing signup/login button for patient(by submit)
 def patientclick_view(request):
     if is_patient(request.user):
-        accountapproval = models.Patient.objects.all().filter(
-            user_id=request.user.id, status=True)
-        if accountapproval:
+        if accountapproval := models.Patient.objects.all().filter(user_id=request.user.id, status=True):
             return redirect('patient-dashboard')
         else:
             return render(request, 'hospital/patient_wait_for_approval.html')
@@ -407,41 +402,17 @@ def admin_discharge_patient_view(request):
 @user_passes_test(is_admin)
 def discharge_patient_view(request, pk):
     patient = models.Patient.objects.get(id=pk)
-    days = (date.today()-patient.admitDate)  # 2 days, 0:00:00
+    days = date.today() - patient.admitDate
     assignedDoctor = models.User.objects.all().filter(id=patient.assignedDoctorId)
-    d = days.days  # only how many day that is 2
-    patientDict = {
-        'patientId': pk,
-        'name': patient.get_name,
-        'mobile': patient.mobile,
-        'address': patient.address,
-        'symptoms': patient.symptoms,
-        'admitDate': patient.admitDate,
-        'todayDate': date.today(),
-        'day': d,
-        'assignedDoctorName': assignedDoctor[0].first_name,
-    }
-    patientDict = {
-        'patientId': pk,
-        'name': patient.get_name,
-        'mobile': patient.mobile,
-        'address': patient.address,
-        'symptoms': patient.symptoms,
-        'admitDate': patient.admitDate,
-        'todayDate': date.today(),
-        'day': d,
-        'assignedDoctorName': assignedDoctor[0].first_name,
-    }
+    d = days.days
+    patientDict = {'patientId': pk, 'name': patient.get_name, 'mobile': patient.mobile, 'address': patient.address, 'symptoms': patient.symptoms, 'admitDate': patient.admitDate, 'todayDate': date.today(), 'day': d, 'assignedDoctorName': assignedDoctor[0].first_name}
+
+    patientDict = {'patientId': pk, 'name': patient.get_name, 'mobile': patient.mobile, 'address': patient.address, 'symptoms': patient.symptoms, 'admitDate': patient.admitDate, 'todayDate': date.today(), 'day': d, 'assignedDoctorName': assignedDoctor[0].first_name}
+
     if request.method == 'POST':
-        feeDict = {
-            'roomCharge': int(request.POST['roomCharge'])*int(d),
-            'doctorFee': request.POST['doctorFee'],
-            'medicineCost': request.POST['medicineCost'],
-            'OtherCharge': request.POST['OtherCharge'],
-            'total': (int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(request.POST['medicineCost'])+int(request.POST['OtherCharge'])
-        }
-        patientDict.update(feeDict)
-        # for updating to database patientDischargeDetails (pDD)
+        feeDict = {'roomCharge': int(request.POST['roomCharge']) * int(d), 'doctorFee': request.POST['doctorFee'], 'medicineCost': request.POST['medicineCost'], 'OtherCharge': request.POST['OtherCharge'], 'total': int(request.POST['roomCharge']) * int(d) + int(request.POST['doctorFee']) + int(request.POST['medicineCost']) + int(request.POST['OtherCharge'])}
+
+        patientDict |= feeDict
         pDD = models.PatientDischargeDetails()
         pDD.patientId = pk
         pDD.patientName = patient.get_name
@@ -453,11 +424,11 @@ def discharge_patient_view(request, pk):
         pDD.releaseDate = date.today()
         pDD.daySpent = int(d)
         pDD.medicineCost = int(request.POST['medicineCost'])
-        pDD.roomCharge = int(request.POST['roomCharge'])*int(d)
+        pDD.roomCharge = int(request.POST['roomCharge']) * int(d)
         pDD.doctorFee = int(request.POST['doctorFee'])
         pDD.OtherCharge = int(request.POST['OtherCharge'])
-        pDD.total = (int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(
-            request.POST['medicineCost'])+int(request.POST['OtherCharge'])
+        pDD.total = (int(request.POST['roomCharge']) * int(d) + int(request.POST['doctorFee']) + int(request.POST['medicineCost'])) + int(request.POST['OtherCharge'])
+
         pDD.save()
         return render(request, 'hospital/patient_final_bill.html', context=patientDict)
     return render(request, 'hospital/patient_generate_bill.html', context=patientDict)
@@ -476,7 +447,7 @@ def render_to_pdf(template_src, context_dict):
     return
 
 
-def download_pdf_view(request, pk):
+def download_pdf_view(request, pk):  # sourcery skip: avoid-builtin-shadow
     dischargeDetails = models.PatientDischargeDetails.objects.all().filter(
         patientId=pk).order_by('-id')[:1]
     dict = {
@@ -567,31 +538,20 @@ def reject_appointment_view(request, pk):
 @login_required(login_url='doctorlogin')
 @user_passes_test(is_doctor)
 def doctor_dashboard_view(request):
-    # for three cards
-    patientcount = models.Patient.objects.all().filter(
-        status=True, assignedDoctorId=request.user.id).count()
-    appointmentcount = models.Appointment.objects.all().filter(
-        status=True, doctorId=request.user.id).count()
-    patientdischarged = models.PatientDischargeDetails.objects.all(
-    ).distinct().filter(assignedDoctorName=request.user.first_name).count()
+    patientcount = models.Patient.objects.all().filter(status=True, assignedDoctorId=request.user.id).count()
 
-    # for  table in doctor dashboard
-    appointments = models.Appointment.objects.all().filter(
-        status=True, doctorId=request.user.id).order_by('-id')
-    patientid = []
-    for a in appointments:
-        patientid.append(a.patientId)
-    patients = models.Patient.objects.all().filter(
-        status=True, user_id__in=patientid).order_by('-id')
+    appointmentcount = models.Appointment.objects.all().filter(status=True, doctorId=request.user.id).count()
+
+    patientdischarged = models.PatientDischargeDetails.objects.all().distinct().filter(assignedDoctorName=request.user.first_name).count()
+
+    appointments = models.Appointment.objects.all().filter(status=True, doctorId=request.user.id).order_by('-id')
+
+    patientid = [a.patientId for a in appointments]
+    patients = models.Patient.objects.all().filter(status=True, user_id__in=patientid).order_by('-id')
+
     appointments = zip(appointments, patients)
-    mydict = {
-        'patientcount': patientcount,
-        'appointmentcount': appointmentcount,
-        'patientdischarged': patientdischarged,
-        'appointments': appointments,
-        # for profile picture of doctor in sidebar
-        'doctor': models.Doctor.objects.get(user_id=request.user.id),
-    }
+    mydict = {'patientcount': patientcount, 'appointmentcount': appointmentcount, 'patientdischarged': patientdischarged, 'appointments': appointments, 'doctor': models.Doctor.objects.get(user_id=request.user.id)}
+
     return render(request, 'hospital/doctor_dashboard.html', context=mydict)
 
 
