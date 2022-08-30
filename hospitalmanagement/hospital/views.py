@@ -540,6 +540,8 @@ def reject_appointment_view(request, pk):
 # ---------------------------------------------------------------------------------
 # ------------------------ DOCTOR RELATED VIEWS START ------------------------------
 # ---------------------------------------------------------------------------------
+
+
 @login_required(login_url='doctorlogin')
 @user_passes_test(is_doctor)
 def doctor_dashboard_view(request):
