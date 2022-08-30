@@ -7,8 +7,8 @@ urlpatterns = [
     path('', views.home_view, name='home'),
 
     # add about us and contact us page paths
-    # path('aboutus', views.aboutus_view),
-    # path('contactus', views.contactus_view),
+    path('aboutus', views.aboutus_view),
+    path('contactus', views.contactus_view),
 
     # add doctor, patient, admin click pages url path
 

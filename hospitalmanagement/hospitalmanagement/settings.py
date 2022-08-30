@@ -135,3 +135,13 @@ LOGIN_URL = '/'
 
 # For default auto assigning primary
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#for contact us give your gmail id and password
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'asadlahorikhan@gmail.com' # this email will be used to send emails
+EMAIL_HOST_PASSWORD = 'oqhexhptbzcgokrh' # host email password required
+EMAIL_RECEIVING_USER = ['john.rory2002@gmail.com'] # email on which you will receive messages sent from website

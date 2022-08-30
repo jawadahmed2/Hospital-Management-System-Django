@@ -753,40 +753,64 @@ def patient_view_appointment_view(request):
     appointments = models.Appointment.objects.all().filter(patientId=request.user.id)
     return render(request, 'hospital/patient_view_appointment.html', {'appointments': appointments, 'patient': patient})
 
+
 @login_required(login_url='patientlogin')
 @user_passes_test(is_patient)
 def patient_discharge_view(request):
-    patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
-    dischargeDetails=models.PatientDischargeDetails.objects.all().filter(patientId=patient.id).order_by('-id')[:1]
-    patientDict=None
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+    dischargeDetails = models.PatientDischargeDetails.objects.all().filter(
+        patientId=patient.id).order_by('-id')[:1]
+    patientDict = None
     if dischargeDetails:
-        patientDict ={
-        'is_discharged':True,
-        'patient':patient,
-        'patientId':patient.id,
-        'patientName':patient.get_name,
-        'assignedDoctorName':dischargeDetails[0].assignedDoctorName,
-        'address':patient.address,
-        'mobile':patient.mobile,
-        'symptoms':patient.symptoms,
-        'admitDate':patient.admitDate,
-        'releaseDate':dischargeDetails[0].releaseDate,
-        'daySpent':dischargeDetails[0].daySpent,
-        'medicineCost':dischargeDetails[0].medicineCost,
-        'roomCharge':dischargeDetails[0].roomCharge,
-        'doctorFee':dischargeDetails[0].doctorFee,
-        'OtherCharge':dischargeDetails[0].OtherCharge,
-        'total':dischargeDetails[0].total,
+        patientDict = {
+            'is_discharged': True,
+            'patient': patient,
+            'patientId': patient.id,
+            'patientName': patient.get_name,
+            'assignedDoctorName': dischargeDetails[0].assignedDoctorName,
+            'address': patient.address,
+            'mobile': patient.mobile,
+            'symptoms': patient.symptoms,
+            'admitDate': patient.admitDate,
+            'releaseDate': dischargeDetails[0].releaseDate,
+            'daySpent': dischargeDetails[0].daySpent,
+            'medicineCost': dischargeDetails[0].medicineCost,
+            'roomCharge': dischargeDetails[0].roomCharge,
+            'doctorFee': dischargeDetails[0].doctorFee,
+            'OtherCharge': dischargeDetails[0].OtherCharge,
+            'total': dischargeDetails[0].total,
         }
         print(patientDict)
     else:
-        patientDict={
-            'is_discharged':False,
-            'patient':patient,
-            'patientId':request.user.id,
+        patientDict = {
+            'is_discharged': False,
+            'patient': patient,
+            'patientId': request.user.id,
         }
-    return render(request,'hospital/patient_discharge.html',context=patientDict)
+    return render(request, 'hospital/patient_discharge.html', context=patientDict)
 
 
-#------------------------ PATIENT RELATED VIEWS END ------------------------------
-#---------------------------------------------------------------------------------
+# ------------------------ PATIENT RELATED VIEWS END ------------------------------
+# ---------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------
+# ------------------------ ABOUT US AND CONTACT US VIEWS START ------------------------------
+# ---------------------------------------------------------------------------------
+def aboutus_view(request):
+    return render(request, 'hospital/aboutus.html')
+
+
+def contactus_view(request):
+    sub = forms.ContactusForm()
+    if request.method == 'POST':
+        sub = forms.ContactusForm(request.POST)
+        if sub.is_valid():
+            email = sub.cleaned_data['Email']
+            name = sub.cleaned_data['Name']
+            message = sub.cleaned_data['Message']
+            send_mail(f'{str(name)} || {str(email)}', message, settings.EMAIL_HOST_USER, settings.EMAIL_RECEIVING_USER, fail_silently=False)
+
+            return render(request, 'hospital/contactussuccess.html')
+    return render(request, 'hospital/contactus.html', {'form': sub})
