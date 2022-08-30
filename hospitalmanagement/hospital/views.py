@@ -685,3 +685,108 @@ def patient_dashboard_view(request):
         'admitDate': patient.admitDate,
     }
     return render(request, 'hospital/patient_dashboard.html', context=mydict)
+
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient)
+def patient_appointment_view(request):
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+    return render(request, 'hospital/patient_appointment.html', {'patient': patient})
+
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient)
+def patient_book_appointment_view(request):
+    appointmentForm = forms.PatientAppointmentForm()
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+    message = None
+    mydict = {'appointmentForm': appointmentForm,
+              'patient': patient, 'message': message}
+    if request.method == 'POST':
+        appointmentForm = forms.PatientAppointmentForm(request.POST)
+        if appointmentForm.is_valid():
+            print(request.POST.get('doctorId'))
+            desc = request.POST.get('description')
+
+            doctor = models.Doctor.objects.get(
+                user_id=request.POST.get('doctorId'))
+
+            appointment = appointmentForm.save(commit=False)
+            appointment.doctorId = request.POST.get('doctorId')
+            # ----user can choose any patient but only their info will be stored
+            appointment.patientId = request.user.id
+            appointment.doctorName = models.User.objects.get(
+                id=request.POST.get('doctorId')).first_name
+            # ----user can choose any patient but only their info will be stored
+            appointment.patientName = request.user.first_name
+            appointment.status = False
+            appointment.save()
+        return HttpResponseRedirect('patient-view-appointment')
+    return render(request, 'hospital/patient_book_appointment.html', context=mydict)
+
+
+def patient_view_doctor_view(request):
+    doctors = models.Doctor.objects.all().filter(status=True)
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+    return render(request, 'hospital/patient_view_doctor.html', {'patient': patient, 'doctors': doctors})
+
+
+def search_doctor_view(request):
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+
+    # whatever user write in search box we get in query
+    query = request.GET['query']
+    doctors = models.Doctor.objects.all().filter(status=True).filter(
+        Q(department__icontains=query) | Q(user__first_name__icontains=query))
+    return render(request, 'hospital/patient_view_doctor.html', {'patient': patient, 'doctors': doctors})
+
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient)
+def patient_view_appointment_view(request):
+    # for profile picture of patient in sidebar
+    patient = models.Patient.objects.get(user_id=request.user.id)
+    appointments = models.Appointment.objects.all().filter(patientId=request.user.id)
+    return render(request, 'hospital/patient_view_appointment.html', {'appointments': appointments, 'patient': patient})
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient)
+def patient_discharge_view(request):
+    patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
+    dischargeDetails=models.PatientDischargeDetails.objects.all().filter(patientId=patient.id).order_by('-id')[:1]
+    patientDict=None
+    if dischargeDetails:
+        patientDict ={
+        'is_discharged':True,
+        'patient':patient,
+        'patientId':patient.id,
+        'patientName':patient.get_name,
+        'assignedDoctorName':dischargeDetails[0].assignedDoctorName,
+        'address':patient.address,
+        'mobile':patient.mobile,
+        'symptoms':patient.symptoms,
+        'admitDate':patient.admitDate,
+        'releaseDate':dischargeDetails[0].releaseDate,
+        'daySpent':dischargeDetails[0].daySpent,
+        'medicineCost':dischargeDetails[0].medicineCost,
+        'roomCharge':dischargeDetails[0].roomCharge,
+        'doctorFee':dischargeDetails[0].doctorFee,
+        'OtherCharge':dischargeDetails[0].OtherCharge,
+        'total':dischargeDetails[0].total,
+        }
+        print(patientDict)
+    else:
+        patientDict={
+            'is_discharged':False,
+            'patient':patient,
+            'patientId':request.user.id,
+        }
+    return render(request,'hospital/patient_discharge.html',context=patientDict)
+
+
+#------------------------ PATIENT RELATED VIEWS END ------------------------------
+#---------------------------------------------------------------------------------
