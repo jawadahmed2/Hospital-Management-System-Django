@@ -41,6 +41,20 @@ urlpatterns = [
     # admin dashboard
     path('admin-dashboard', views.admin_dashboard_view, name='admin-dashboard'),
 
+    # Technician Related Admin Work
+    path('admin-technician', views.admin_technician_view, name='admin-technician'),
+    path('admin-view-technician', views.admin_view_technician_view,
+         name='admin-view-technician'),
+    path('delete-technician-from-hospital/<int:pk>',
+         views.delete_technician_from_hospital_view, name='delete-technician-from-hospital'),
+    path('update-technician/<int:pk>', views.update_technician_view, name='update-technician'),
+    path('admin-add-technician', views.admin_add_technician_view, name='admin-add-technician'),
+    path('admin-approve-technician', views.admin_approve_technician_view,
+         name='admin-approve-technician'),
+    path('approve-technician/<int:pk>',
+         views.approve_technician_view, name='approve-technician'),
+    path('reject-technician/<int:pk>', views.reject_technician_view, name='reject-technician'),
+
     # # Doctor related admin work
     path('admin-doctor', views.admin_doctor_view, name='admin-doctor'),
     path('admin-view-doctor', views.admin_view_doctor_view,

@@ -198,7 +198,9 @@ def afterlogin_view(request):  # sourcery skip: use-named-expression
 def admin_dashboard_view(request):
     # for both table in admin dashboard
     doctors = models.Doctor.objects.all().order_by('-id')
+
     patients = models.Patient.objects.all().order_by('-id')
+    technicians = models.Technician.objects.all().order_by('-id')
     # for three cards
     doctorcount = models.Doctor.objects.all().filter(status=True).count()
     pendingdoctorcount = models.Doctor.objects.all().filter(status=False).count()
@@ -206,21 +208,126 @@ def admin_dashboard_view(request):
     patientcount = models.Patient.objects.all().filter(status=True).count()
     pendingpatientcount = models.Patient.objects.all().filter(status=False).count()
 
+    techniciancount = models.Technician.objects.all().filter(status=True).count()
+    pendingtechniciancount = models.Technician.objects.all().filter(status=False).count()
+
     appointmentcount = models.Appointment.objects.all().filter(status=True).count()
     pendingappointmentcount = models.Appointment.objects.all().filter(status=False).count()
     mydict = {
         'doctors': doctors,
         'patients': patients,
+        'technicians': technicians,
         'doctorcount': doctorcount,
         'pendingdoctorcount': pendingdoctorcount,
         'patientcount': patientcount,
         'pendingpatientcount': pendingpatientcount,
+        'techniciancount': techniciancount,
+        'pendingtechniciancount': pendingtechniciancount,
         'appointmentcount': appointmentcount,
         'pendingappointmentcount': pendingappointmentcount,
+        'techs_and_docs': zip(doctors,technicians),
     }
     return render(request, 'hospital/admin_dashboard.html', context=mydict)
 
-# this view for sidebar click on admin page
+# the view for sidebar click on technician page
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_technician_view(request):
+    return render(request, 'hospital/admin_technician.html')
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_view_technician_view(request):
+    technicians = models.Technician.objects.all().filter(status=True)
+    return render(request, 'hospital/admin_view_technician.html', {'technicians': technicians})
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def delete_technician_from_hospital_view(request, pk):
+    technician = models.Technician.objects.get(id=pk)
+    user = models.User.objects.get(id=technician.user_id)
+    user.delete()
+    technician.delete()
+    return redirect('admin-view-technician')
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def update_technician_view(request, pk):
+    technician = models.Technician.objects.get(id=pk)
+    user = models.User.objects.get(id=technician.user_id)
+
+    userForm = forms.TechnicianUserForm(instance=user)
+    technicianForm = forms.TechnicianForm(request.FILES, instance=technician)
+    mydict = {'userForm': userForm, 'technicianForm': technicianForm}
+    if request.method == 'POST':
+        userForm = forms.TechnicianUserForm(request.POST, instance=user)
+        technicianForm = forms.TechnicianForm(
+            request.POST, request.FILES, instance=technician)
+        if userForm.is_valid() and technicianForm.is_valid():
+            user = userForm.save()
+            user.set_password(user.password)
+            user.save()
+            technician = technicianForm.save(commit=False)
+            technician.status = True
+            technician.save()
+            return redirect('admin-view-technician')
+    return render(request, 'hospital/admin_update_technician.html', context=mydict)
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_add_technician_view(request):
+    userForm = forms.TechnicianUserForm()
+    technicianForm = forms.TechnicianForm()
+    mydict = {'userForm': userForm, 'technicianForm': technicianForm}
+    if request.method == 'POST':
+        userForm = forms.TechnicianUserForm(request.POST)
+        technicianForm = forms.TechnicianForm(request.POST, request.FILES)
+        if userForm.is_valid() and technicianForm.is_valid():
+            user = userForm.save()
+            user.set_password(user.password)
+            user.save()
+
+            technician = technicianForm.save(commit=False)
+            technician.user = user
+            technician.status = True
+            technician.save()
+
+            my_technician_group = Group.objects.get_or_create(name='TECHNICIAN')
+            my_technician_group[0].user_set.add(user)
+
+        return HttpResponseRedirect('admin-view-technician')
+    return render(request, 'hospital/admin_add_technician.html', context=mydict)
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_approve_technician_view(request):
+    # those whose approval are needed
+    technicians = models.Technician.objects.all().filter(status=False)
+    return render(request, 'hospital/admin_approve_technician.html', {'technicians': technicians})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def approve_technician_view(request, pk):
+    technician = models.Technician.objects.get(id=pk)
+    technician.status = True
+    technician.save()
+    return redirect(reverse('admin-approve-technician'))
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def reject_technician_view(request, pk):
+    technician = models.Doctor.objects.get(id=pk)
+    user = models.User.objects.get(id=technician.user_id)
+    user.delete()
+    technician.delete()
+    return redirect('admin-approve-technician')
+
+
+
+# this view for doctor sidebar click on admin page
 
 
 @login_required(login_url='adminlogin')
