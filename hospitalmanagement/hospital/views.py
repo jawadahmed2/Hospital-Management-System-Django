@@ -690,7 +690,26 @@ def reject_appointment_view(request, pk):
 
 
 # ---------------------------------------------------------------------------------
-# ------------------------ DOCTOR RELATED VIEWS START ------------------------------
+# ------------------------ TECHNICIAN RELATED VIEWS START ------------------------------
+# ---------------------------------------------------------------------------------
+@login_required(login_url='technicianlogin')
+@user_passes_test(is_technician)
+def technician_dashboard_view(request):
+    technician = models.Technician.objects.get(user_id = request.user.id)
+    doctor = models.Doctor.objects.get(user_id=technician.assignedDoctorId)
+    mydict = {
+        'technician':technician,
+        'doctorName': doctor.get_name,
+        'doctorMobile': doctor.mobile,
+        'doctorAddress': doctor.address,
+        'doctorDepartment': doctor.department,
+    }
+    return render(request, 'hospital/technician_dashboard.html', context=mydict)
+
+
+
+# ---------------------------------------------------------------------------------
+# ------------------------ DOCTOR RELATED VIEWS START -----------------------------
 # ---------------------------------------------------------------------------------
 
 

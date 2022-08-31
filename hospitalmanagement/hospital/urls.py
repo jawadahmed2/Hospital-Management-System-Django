@@ -47,13 +47,16 @@ urlpatterns = [
          name='admin-view-technician'),
     path('delete-technician-from-hospital/<int:pk>',
          views.delete_technician_from_hospital_view, name='delete-technician-from-hospital'),
-    path('update-technician/<int:pk>', views.update_technician_view, name='update-technician'),
-    path('admin-add-technician', views.admin_add_technician_view, name='admin-add-technician'),
+    path('update-technician/<int:pk>',
+         views.update_technician_view, name='update-technician'),
+    path('admin-add-technician', views.admin_add_technician_view,
+         name='admin-add-technician'),
     path('admin-approve-technician', views.admin_approve_technician_view,
          name='admin-approve-technician'),
     path('approve-technician/<int:pk>',
          views.approve_technician_view, name='approve-technician'),
-    path('reject-technician/<int:pk>', views.reject_technician_view, name='reject-technician'),
+    path('reject-technician/<int:pk>',
+         views.reject_technician_view, name='reject-technician'),
 
     # # Doctor related admin work
     path('admin-doctor', views.admin_doctor_view, name='admin-doctor'),
@@ -151,21 +154,21 @@ urlpatterns += [
 ]
 
 # ---------FOR Technician RELATED URLS-------------------------------------
-# urlpatterns += [
+urlpatterns += [
 
-#     path('technician-dashboard', views.patient_dashboard_view,
-#          name='technician-dashboard'),
-#     path('patient-appointment', views.patient_appointment_view,
-#          name='patient-appointment'),
-#     path('patient-book-appointment', views.patient_book_appointment_view,
-#          name='patient-book-appointment'),
-#     path('patient-view-appointment', views.patient_view_appointment_view,
-#          name='patient-view-appointment'),
-#     path('patient-view-doctor', views.patient_view_doctor_view,
-#          name='patient-view-doctor'),
-#     path('searchdoctor', views.search_doctor_view, name='searchdoctor'),
-#     path('patient-discharge', views.patient_discharge_view,
-#          name='patient-discharge'),
+    path('technician-dashboard', views.technician_dashboard_view,
+         name='technician-dashboard'),
+    #     path('patient-appointment', views.patient_appointment_view,
+    #          name='patient-appointment'),
+    #     path('patient-book-appointment', views.patient_book_appointment_view,
+    #          name='patient-book-appointment'),
+    #     path('patient-view-appointment', views.patient_view_appointment_view,
+    #          name='patient-view-appointment'),
+    #     path('patient-view-doctor', views.patient_view_doctor_view,
+    #          name='patient-view-doctor'),
+    #     path('searchdoctor', views.search_doctor_view, name='searchdoctor'),
+    #     path('patient-discharge', views.patient_discharge_view,
+    #          name='patient-discharge'),
 
 
-# ]
+]
