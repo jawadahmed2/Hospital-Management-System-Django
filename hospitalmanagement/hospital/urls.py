@@ -15,11 +15,13 @@ urlpatterns = [
     path('adminclick', views.adminclick_view, name='adminclick'),
     path('doctorclick', views.doctorclick_view, name='doctorclick'),
     path('patientclick', views.patientclick_view, name='patientclick'),
+    path('technicianclick', views.technicianclick_view, name='technicianclick'),
 
     # add admin, patient, doctor registration url
     path('adminsignup', views.admin_signup_view, name='adminsignup'),
     path('doctorsignup', views.doctor_signup_view, name='doctorsignup'),
     path('patientsignup', views.patient_signup_view, name='patientsignup'),
+    path('techniciansignup', views.technician_signup_view, name='techniciansignup'),
 
     # admin doctor and patient login
     path('adminlogin', LoginView.as_view(
@@ -28,6 +30,8 @@ urlpatterns = [
         template_name='hospital/doctorlogin.html')),
     path('patientlogin', LoginView.as_view(
         template_name='hospital/patientlogin.html')),
+    path('technicianlogin', LoginView.as_view(
+        template_name='hospital/technicianlogin.html')),
 
     # after login and logout
     path('afterlogin', views.afterlogin_view, name='afterlogin'),
@@ -131,3 +135,23 @@ urlpatterns += [
 
 
 ]
+
+# ---------FOR Technician RELATED URLS-------------------------------------
+# urlpatterns += [
+
+#     path('technician-dashboard', views.patient_dashboard_view,
+#          name='technician-dashboard'),
+#     path('patient-appointment', views.patient_appointment_view,
+#          name='patient-appointment'),
+#     path('patient-book-appointment', views.patient_book_appointment_view,
+#          name='patient-book-appointment'),
+#     path('patient-view-appointment', views.patient_view_appointment_view,
+#          name='patient-view-appointment'),
+#     path('patient-view-doctor', views.patient_view_doctor_view,
+#          name='patient-view-doctor'),
+#     path('searchdoctor', views.search_doctor_view, name='searchdoctor'),
+#     path('patient-discharge', views.patient_discharge_view,
+#          name='patient-discharge'),
+
+
+# ]

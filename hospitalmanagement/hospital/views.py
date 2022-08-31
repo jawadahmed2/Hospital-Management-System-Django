@@ -38,6 +38,10 @@ def is_patient(user):
     return user.groups.filter(name='PATIENT').exists()
 
 
+def is_technician(user):
+    return user.groups.filter(name='TECHNICIAN').exists()
+
+
 # for showing signup/login button for admin(by submit)
 def adminclick_view(request):
     if request.user.is_authenticated and is_admin(request.user):
@@ -65,6 +69,17 @@ def patientclick_view(request):
         else:
             return render(request, 'hospital/patient_wait_for_approval.html')
     return render(request, 'hospital/patientclick.html')
+
+# for showing signup/login button for technician(by submit)
+
+
+def technicianclick_view(request):
+    if is_technician(request.user):
+        if accountapproval := models.Technician.objects.all().filter(user_id=request.user.id, status=True):
+            return redirect('technician-dashboard')
+        else:
+            return render(request, 'hospital/technician_wait_for_approval.html')
+    return render(request, 'hospital/technicianclick.html')
 
 # Now work for signup views
 
@@ -124,6 +139,28 @@ def patient_signup_view(request):  # sourcery skip: extract-method
     return render(request, 'hospital/patientsignup.html', context=mydict)
 
 
+def technician_signup_view(request):  # sourcery skip: extract-method
+    userForm = forms.TechnicianUserForm()
+    technicianForm = forms.TechnicianForm()
+    mydict = {'userForm': userForm, 'technicianForm': technicianForm}
+    if request.method == 'POST':
+        userForm = forms.TechnicianUserForm(request.POST)
+        technicianForm = forms.TechnicianForm(request.POST, request.FILES)
+        if userForm.is_valid() and technicianForm.is_valid():
+            user = userForm.save()
+            user.set_password(user.password)
+            user.save()
+            technician = technicianForm.save(commit=False)
+            technician.user = user
+            technician.assignedDoctorId = request.POST.get('assignedDoctorId')
+            technician = technician.save()
+            my_technician_group = Group.objects.get_or_create(
+                name='TECHNICIAN')
+            my_technician_group[0].user_set.add(user)
+        return HttpResponseRedirect('technicianlogin')
+    return render(request, 'hospital/techniciansignup.html', context=mydict)
+
+
 # ---------AFTER ENTERING CREDENTIALS WE CHECK WHETHER USERNAME AND PASSWORD IS OF ADMIN,DOCTOR OR PATIENT
 def afterlogin_view(request):  # sourcery skip: use-named-expression
     if is_admin(request.user):
@@ -143,6 +180,14 @@ def afterlogin_view(request):  # sourcery skip: use-named-expression
             return redirect('patient-dashboard')
         else:
             return render(request, 'hospital/patient_wait_for_approval.html')
+
+    elif is_technician(request.user):
+        accountapproval = models.Technician.objects.all().filter(
+            user_id=request.user.id, status=True)
+        if accountapproval:
+            return redirect('technician-dashboard')
+        else:
+            return render(request, 'hospital/technician_wait_for_approval.html')
 
 
 # ---------------------------------------------------------------------------------
@@ -810,7 +855,8 @@ def contactus_view(request):
             email = sub.cleaned_data['Email']
             name = sub.cleaned_data['Name']
             message = sub.cleaned_data['Message']
-            send_mail(f'{str(name)} || {str(email)}', message, settings.EMAIL_HOST_USER, settings.EMAIL_RECEIVING_USER, fail_silently=False)
+            send_mail(f'{str(name)} || {str(email)}', message, settings.EMAIL_HOST_USER,
+                      settings.EMAIL_RECEIVING_USER, fail_silently=False)
 
             return render(request, 'hospital/contactussuccess.html')
     return render(request, 'hospital/contactus.html', {'form': sub})
