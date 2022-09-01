@@ -130,6 +130,13 @@ urlpatterns += [
     path('delete-appointment/<int:pk>',
          views.delete_appointment_view, name='delete-appointment'),
 
+    # path for technicians
+    path('doctor-tests', views.doctor_view_test,
+         name='doctor-tests'),
+    path('doctor-view-test', views.doctor_view_test_view,
+         name='doctor-view-test'),
+    path('doctor-add-test', views.doctor_add_test,
+         name='doctor-add-test'),
 ]
 
 
@@ -158,6 +165,7 @@ urlpatterns += [
 
     path('technician-dashboard', views.technician_dashboard_view,
          name='technician-dashboard'),
+    path('technician-test', views.technician_test_view, name='technician-test'),
     #     path('patient-appointment', views.patient_appointment_view,
     #          name='patient-appointment'),
     #     path('patient-book-appointment', views.patient_book_appointment_view,

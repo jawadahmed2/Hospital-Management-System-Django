@@ -88,6 +88,18 @@ class Appointment(models.Model):
     description = models.TextField(max_length=500)
     status = models.BooleanField(default=False)
 
+class Test(models.Model):
+    patientId = models.PositiveIntegerField(null=True)
+    doctorId = models.PositiveIntegerField(null=True)
+    technicianId = models.PositiveIntegerField(null=True)
+    patientName = models.CharField(max_length=40, null=True)
+    doctorName = models.CharField(max_length=40, null=True)
+    technicianName = models.CharField(max_length=40, null=True)
+    testDate = models.DateField(auto_now=True)
+    description = models.TextField(max_length=500)
+    result = models.TextField(max_length=500, null=True)
+    status = models.BooleanField(default=False)
+
 
 class PatientDischargeDetails(models.Model):
     patientId = models.PositiveIntegerField(null=True)

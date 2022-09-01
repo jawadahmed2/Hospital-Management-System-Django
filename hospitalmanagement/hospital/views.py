@@ -697,15 +697,34 @@ def reject_appointment_view(request, pk):
 def technician_dashboard_view(request):
     technician = models.Technician.objects.get(user_id = request.user.id)
     doctor = models.Doctor.objects.get(user_id=technician.assignedDoctorId)
+    test = models.Test.objects.all().order_by('-id')
+    testcount = models.Test.objects.all().filter(status=True).count()
+    pendingtestcount = models.Test.objects.all().filter(status=False).count()
     mydict = {
         'technician':technician,
         'doctorName': doctor.get_name,
         'doctorMobile': doctor.mobile,
         'doctorAddress': doctor.address,
         'doctorDepartment': doctor.department,
+        'test': test,
+        'testcount':testcount,
+        'pendingtestcount':pendingtestcount,
     }
     return render(request, 'hospital/technician_dashboard.html', context=mydict)
 
+
+# technician update pending tests
+@login_required(login_url='technicianlogin')
+@user_passes_test(is_technician)
+def technician_test_view(request):
+    return render(request, 'hospital/technician_test.html')
+
+
+@login_required(login_url='technicianlogin')
+@user_passes_test(is_technician)
+def technician_view_test_view(request):
+    tests = models.Test.objects.all().filter(technicianId=request.user.id).order_by('-id')
+    return render(request, 'hospital/technician_view_test.html', {'tests': tests})
 
 
 # ---------------------------------------------------------------------------------
@@ -833,6 +852,59 @@ def delete_appointment_view(request, pk):
     return render(request, 'hospital/doctor_delete_appointment.html', {'appointments': appointments, 'doctor': doctor})
 
 
+
+# Doctor prescribe tests of patient to technician
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor)
+def doctor_view_test(request):
+    # for profile picture of patient in sidebar
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    return render(request, 'hospital/doctor_test.html', {'doctor': doctor})
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor)
+def doctor_view_test_view(request):
+    # for profile picture of patient in sidebar
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    tests = models.Test.objects.all().filter(doctorId=request.user.id)
+    return render(request, 'hospital/doctor_view_test.html', {'doctor': doctor, 'tests': tests})
+
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor)
+def doctor_add_test(request):
+    testForm = forms.TestForm()
+    # for profile picture of patient in sidebar
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    message = None
+    mydict = {'testForm': testForm,
+              'doctor': doctor, 'message': message}
+    if request.method == 'POST':
+        testForm = forms.TestForm(request.POST)
+        if testForm.is_valid():
+            desc = request.POST.get('description')
+
+            patient = models.Patient.objects.get(
+                user_id=request.POST.get('patientId'))
+
+            test = testForm.save(commit=False)
+            test.technicianId = request.POST.get('technicianId')
+            # ----user can choose any patient but only their info will be stored
+            test.patientId = request.POST.get('patientId')
+            test.doctorId = request.user.id
+            test.doctorName = request.user.first_name
+
+            test.technicianName = models.User.objects.get(
+                id=request.POST.get('technicianId')).first_name
+            # ----user can choose any patient but only their info will be stored
+            test.patientName = models.User.objects.get(
+                id=request.POST.get('patientId')).first_name
+            test.status = False
+            test.save()
+        return HttpResponseRedirect('doctor-view-test')
+    return render(request, 'hospital/doctor_add_test.html', context=mydict)
+
 # ---------------------------------------------------------------------------------
 # ------------------------ DOCTOR RELATED VIEWS END ------------------------------
 # ---------------------------------------------------------------------------------
@@ -878,7 +950,6 @@ def patient_book_appointment_view(request):
     if request.method == 'POST':
         appointmentForm = forms.PatientAppointmentForm(request.POST)
         if appointmentForm.is_valid():
-            print(request.POST.get('doctorId'))
             desc = request.POST.get('description')
 
             doctor = models.Doctor.objects.get(
