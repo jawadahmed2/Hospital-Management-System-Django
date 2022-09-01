@@ -100,7 +100,7 @@ class TestForm(forms.ModelForm):
 
     class Meta:
         model = models.Test
-        fields = ['description', 'status']
+        fields = ['description', 'status', 'result']
 
 # for contact us page
 

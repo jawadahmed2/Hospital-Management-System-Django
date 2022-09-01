@@ -97,7 +97,7 @@ class Test(models.Model):
     technicianName = models.CharField(max_length=40, null=True)
     testDate = models.DateField(auto_now=True)
     description = models.TextField(max_length=500)
-    result = models.TextField(max_length=500, null=True)
+    result = models.TextField(max_length=500, null=True, default='Pending')
     status = models.BooleanField(default=False)
 
 

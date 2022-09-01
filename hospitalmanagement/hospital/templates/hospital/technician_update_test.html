@@ -1,4 +1,4 @@
-{% extends 'hospital/doctor_base.html' %}
+{% extends 'hospital/technician_base.html' %}
 {% load widget_tweaks %}
 {% block content %}
 
@@ -47,50 +47,28 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <br><br>
-{% if message %}
-<script>
-    var a = "{{message}}";
-    alert(a);
-</script>
-
-{% endif %}
-
-
-<!------ add appointment page by patient(sumit)  ---------->
-<form method="post">
+<!------ update page for doctor by admin(sumit)  ---------->
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="container register-form">
         <div class="form">
             <div class="note">
-                <p>Add Test Details</p>
+                <p>Update Test Result Here</p>
             </div>
             <div class="form-content">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            {% render_field testForm.description class="form-control" placeholder="Add Test For Patient" %}
+                            {% render_field testForm.result class="form-control" placeholder="Update Result" %}
                         </div>
-                        <div class="form-group">
-                            {% render_field testForm.patientId class="form-control" placeholder="patient" %}
-                        </div>
-
-                        <div class="form-group">
-                            {% render_field testForm.technicianId class="form-control" placeholder="technician" %}
-                        </div>
-
-                        <div style="display:none;" class="form-group">
-                            {% render_field testForm.result class="form-control" placeholder="Result" %}
-                        </div>
-
-
-
 
                     </div>
 
                 </div>
-                <button type="submit" class="btnSubmit">Go</button>
+                <button type="submit" class="btnSubmit">Update</button>
             </div>
         </div>
     </div>
 </form>
+
 {% endblock content %}

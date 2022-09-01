@@ -726,6 +726,29 @@ def technician_view_test_view(request):
     tests = models.Test.objects.all().filter(technicianId=request.user.id).order_by('-id')
     return render(request, 'hospital/technician_view_test.html', {'tests': tests})
 
+@login_required(login_url='technicianlogin')
+@user_passes_test(is_technician)
+def technician_update_test_result(request, pk):
+    test = models.Test.objects.get(id=pk)
+    patientId = test.patientId
+    technicianId = request.user.id
+    desc = test.description
+
+    testForm = forms.TestForm(instance=test)
+    mydict = {'testForm': testForm , 'patientId': patientId, 'technicianId': technicianId}
+
+    if request.method == 'POST':
+        testForm = forms.TestForm(request.POST)
+
+        if testForm.is_valid():
+            test = testForm.save(commit=False)
+            test.result = request.POST.get('result')
+            test.status = True
+            test.save()
+            return redirect('technician_test_view')
+    return render(request, 'hospital/technician_update_test.html', context=mydict)
+
+
 
 # ---------------------------------------------------------------------------------
 # ------------------------ DOCTOR RELATED VIEWS START -----------------------------
